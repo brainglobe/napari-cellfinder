@@ -1,5 +1,5 @@
 from pathlib import Path
-from napari_cellfinder import napari_get_reader
+from napari_cellfinder.cellfinder import napari_get_reader
 
 
 data_dir = str(Path(__file__).resolve().parent / "data")
