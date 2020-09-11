@@ -16,7 +16,6 @@ from imlib.IO.cells import cells_xml_to_df
 from napari_plugin_engine import napari_hook_implementation
 
 
-
 def is_cellfinder_dir(path):
     """Determines whether a path is to a brainreg output directory
 
@@ -98,7 +97,8 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
         A list of LayerData tuples where each tuple in the list contains
         (data, metadata, layer_type), where data is a numpy array, metadata is
         a dict of keyword arguments for the corresponding viewer.add_* method
-        in napari, and layer_type is a lower-case string naming the type of layer.
+        in napari, and layer_type is a lower-case string naming the type of
+        layer.
         Both "meta", and "layer_type" are optional. napari will default to
         layer_type=="image" if not provided
     """
@@ -108,38 +108,34 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
 
     classified_cells_path = path / "points" / "cell_classification.xml"
 
-
-
-    # with open(path / "brainreg.json") as json_file:
-    #     metadata = json.load(json_file)
-    #
-    # atlas = BrainGlobeAtlas(metadata["atlas"])
-    # metadata["atlas_class"] = atlas
-
     layers = []
 
     cells, non_cells = get_cell_arrays(str(classified_cells_path))
     layers.append(
         (
             non_cells,
-            {"name": "Non cells",
-             "size": point_size,
-             "n_dimensional": True,
-             "opacity": opacity,
-             "symbol": symbol,
-             "face_color": "lightskyblue"},
+            {
+                "name": "Non cells",
+                "size": point_size,
+                "n_dimensional": True,
+                "opacity": opacity,
+                "symbol": symbol,
+                "face_color": "lightskyblue",
+            },
             "points",
         )
     )
     layers.append(
         (
             cells,
-            {"name": "Cells",
-             "size": point_size,
-             "n_dimensional": True,
-             "opacity": opacity,
-             "symbol": symbol,
-             "face_color": "lightgoldenrodyellow"},
+            {
+                "name": "Cells",
+                "size": point_size,
+                "n_dimensional": True,
+                "opacity": opacity,
+                "symbol": symbol,
+                "face_color": "lightgoldenrodyellow",
+            },
             "points",
         )
     )
