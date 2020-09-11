@@ -11,9 +11,7 @@ def read(fname):
     return codecs.open(file_path, encoding="utf-8").read()
 
 
-requirements = [
-    "napari-plugin-engine >= 0.1.4",
-]
+requirements = ["napari-plugin-engine >= 0.1.4", "imlib"]
 
 
 # https://github.com/pypa/setuptools_scm
