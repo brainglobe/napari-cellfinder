@@ -11,14 +11,9 @@ def read(fname):
     return codecs.open(file_path, encoding="utf-8").read()
 
 
-# Add your dependencies in requirements.txt
-# Note: you can add test-specific requirements in tox.ini
-requirements = []
-with open("requirements.txt") as f:
-    for line in f:
-        stripped = line.split("#")[0].strip()
-        if len(stripped) > 0:
-            requirements.append(stripped)
+requirements = [
+    "napari-plugin-engine >= 0.1.4",
+]
 
 
 # https://github.com/pypa/setuptools_scm
