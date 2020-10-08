@@ -56,7 +56,6 @@ def napari_get_reader(path):
         If the path is a recognized format, return a function that accepts the
         same path or list of paths, and returns a list of layer data tuples.
     """
-
     if isinstance(path, str) and is_cellfinder_dir(path):
         return reader_function
 
