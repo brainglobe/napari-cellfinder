@@ -8,23 +8,27 @@
 
 Visualise cellfinder results with napari
 
+
 ----------------------------------
 
-This [napari] plugin was generated with [Cookiecutter] using with [@napari]'s [cookiecutter-napari-plugin] template.
-
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
-
-and review the napari docs for plugin developers:
-https://napari.org/docs/plugins/index.html
--->
 
 ## Installation
 
 You can install `napari-cellfinder` via [pip]:
 
     pip install napari-cellfinder
+
+## Usage
+* Open napari (however you normally do it, but typically just type `napari` into your terminal)
+* Load your raw data (drag and drop the data directories into napari, one at a time)
+* Drag and drop your cellfinder output directory into napari.
+
+The plugin will then load your detected cells (in yellow) and the rejected cell 
+candidates (in blue). If you carried out registration, then these results will be 
+overlaid (similarly to the [napari-brainreg] plugin, but transformed to the 
+coordinate space of your raw data).
+
+*Image to come*
 
 ## Contributing
 
@@ -40,6 +44,7 @@ Distributed under the terms of the [MIT] license,
 
 If you encounter any problems, please [file an issue] along with a detailed description.
 
+[napari-brainreg]: https://github.com/brainglobe/napari-brainreg
 [napari]: https://github.com/napari/napari
 [Cookiecutter]: https://github.com/audreyr/cookiecutter
 [@napari]: https://github.com/napari
