@@ -22,7 +22,7 @@ setup(
     author="Adam Tyson",
     author_email="adam.tyson@ucl.ac.uk",
     license="MIT",
-    url="https://github.com/adamltyson/napari-cellfinder",
+    url="https://github.com/brainglobe/napari-cellfinder",
     description="Visualise cellfinder results with napari",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
