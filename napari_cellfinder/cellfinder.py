@@ -35,9 +35,8 @@ def is_cellfinder_dir(path):
         filelist = os.listdir(path)
     else:
         return False
-    for fname in filelist:
-        if fname == "cellfinder.json":
-            return True
+    if "cellfinder.json" in filelist:
+        return True
     return False
 
 
@@ -105,10 +104,39 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
     print("Loading cellfinder directory")
     path = Path(os.path.abspath(path))
 
-    classified_cells_path = path / "points" / "cell_classification.xml"
-
     layers = []
 
+    registration_directory = path / "registration"
+    if registration_directory.exists():
+        load_registration(layers, registration_directory)
+
+    classified_cells_path = path / "points" / "cell_classification.xml"
+    load_cells(
+        layers,
+        classified_cells_path,
+        point_size,
+        opacity,
+        symbol,
+        "lightgoldenrodyellow",
+        "lightskyblue",
+    )
+
+    return layers
+
+
+def load_registration(layers, registration_directory):
+    return layers
+
+
+def load_cells(
+    layers,
+    classified_cells_path,
+    point_size,
+    opacity,
+    symbol,
+    cell_color,
+    non_cell_color,
+):
     cells, non_cells = get_cell_arrays(str(classified_cells_path))
     layers.append(
         (
@@ -119,7 +147,7 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
                 "n_dimensional": True,
                 "opacity": opacity,
                 "symbol": symbol,
-                "face_color": "lightskyblue",
+                "face_color": non_cell_color,
             },
             "points",
         )
@@ -133,10 +161,9 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
                 "n_dimensional": True,
                 "opacity": opacity,
                 "symbol": symbol,
-                "face_color": "lightgoldenrodyellow",
+                "face_color": cell_color,
             },
             "points",
         )
     )
-
     return layers
