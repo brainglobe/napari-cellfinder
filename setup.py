@@ -11,7 +11,12 @@ def read(fname):
     return codecs.open(file_path, encoding="utf-8").read()
 
 
-requirements = ["napari-plugin-engine >= 0.1.4", "imlib"]
+requirements = [
+    "napari-plugin-engine >= 0.1.4",
+    "imlib",
+    "napari-ndtiffs",
+    "napari-brainreg",
+]
 
 
 # https://github.com/pypa/setuptools_scm
@@ -22,7 +27,7 @@ setup(
     author="Adam Tyson",
     author_email="adam.tyson@ucl.ac.uk",
     license="MIT",
-    url="https://github.com/adamltyson/napari-cellfinder",
+    url="https://github.com/brainglobe/napari-cellfinder",
     description="Visualise cellfinder results with napari",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",

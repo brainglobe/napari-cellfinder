@@ -10,10 +10,14 @@ Replace code below accordingly.  For complete documentation see:
 https://napari.org/docs/plugins/for_plugin_developers.html
 """
 import os
+import sys
+import json
+import bg_space as bgs
 from pathlib import Path
 from imlib.cells.cells import Cell
 from imlib.IO.cells import cells_xml_to_df
 from napari_plugin_engine import napari_hook_implementation
+from napari_brainreg.brainreg import reader_function as brainreg_reader
 
 
 def is_cellfinder_dir(path):
@@ -35,9 +39,8 @@ def is_cellfinder_dir(path):
         filelist = os.listdir(path)
     else:
         return False
-    for fname in filelist:
-        if fname == "cellfinder.json":
-            return True
+    if "cellfinder.json" in filelist:
+        return True
     return False
 
 
@@ -56,7 +59,6 @@ def napari_get_reader(path):
         If the path is a recognized format, return a function that accepts the
         same path or list of paths, and returns a list of layer data tuples.
     """
-
     if isinstance(path, str) and is_cellfinder_dir(path):
         return reader_function
 
@@ -105,11 +107,114 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
 
     print("Loading cellfinder directory")
     path = Path(os.path.abspath(path))
-
-    classified_cells_path = path / "points" / "cell_classification.xml"
+    with open(path / "cellfinder.json") as json_file:
+        metadata = json.load(json_file)
 
     layers = []
 
+    registration_directory = path / "registration"
+    if registration_directory.exists():
+        layers = load_registration(layers, registration_directory, metadata)
+
+    classified_cells_path = path / "points" / "cell_classification.xml"
+    layers = load_cells(
+        layers,
+        classified_cells_path,
+        point_size,
+        opacity,
+        symbol,
+        "lightgoldenrodyellow",
+        "lightskyblue",
+    )
+
+    return layers
+
+
+def load_registration(layers, registration_directory, metadata):
+    registration_layers = brainreg_reader(registration_directory)
+    registration_layers = remove_downsampled_images(registration_layers)
+    atlas = get_atlas(registration_layers)
+
+    registration_layers = scale_reorient_layers(registration_layers, atlas, metadata)
+    layers.extend(registration_layers)
+    return layers
+
+
+def get_atlas(layers):
+    for layer in layers:
+        atlas = layer[1]["metadata"]["atlas_class"]
+        if atlas:
+            return atlas
+
+
+def remove_downsampled_images(layers):
+    # assumes the atlas annotations and boundaries are the last two layers
+    layers = list(layers)
+    layers = layers[-2:]
+    layers = tuple(layers)
+    return layers
+
+
+def scale_reorient_layers(layers, atlas, metadata):
+    layers = reorient_registration_layers(layers, atlas, metadata)
+    layers = scale_registration_layers(layers, atlas, metadata)
+    return layers
+
+
+def reorient_registration_layers(layers, atlas, metadata):
+    # TODO: do this with napari affine transforms, rather than transforming
+    # the stack in memory
+    atlas_orientation = atlas.orientation
+    raw_data_orientation = metadata["orientation"]
+    new_layers = []
+    for layer in layers:
+        new_layer = reorient_registration_layer(
+            layer, atlas_orientation, raw_data_orientation
+        )
+        new_layers.append(new_layer)
+    return new_layers
+
+
+def reorient_registration_layer(layer, atlas_orientation, raw_data_orientation):
+    layer = list(layer)
+    layer[0] = bgs.map_stack_to(atlas_orientation, raw_data_orientation, layer[0])
+    layer = tuple(layer)
+    return layer
+
+
+def scale_registration_layers(layers, atlas, metadata):
+    new_layers = []
+    scale = get_scale(atlas, metadata)
+    for layer in layers:
+        new_layer = scale_registration_layer(layer, scale)
+        new_layers.append(new_layer)
+    return new_layers
+
+
+def get_scale(atlas, metadata):
+    x_scale = atlas.resolution[2] / metadata["x_pixel_um"]
+    y_scale = atlas.resolution[1] / metadata["y_pixel_um"]
+    z_scale = atlas.resolution[0] / metadata["z_pixel_um"]
+    scale = (z_scale, y_scale, x_scale)
+    return scale
+
+
+def scale_registration_layer(layer, scale):
+    layer = list(layer)
+    layer[1]["scale"] = scale
+    layer = tuple(layer)
+    return layer
+
+
+def load_cells(
+    layers,
+    classified_cells_path,
+    point_size,
+    opacity,
+    symbol,
+    cell_color,
+    non_cell_color,
+):
     cells, non_cells = get_cell_arrays(str(classified_cells_path))
     layers.append(
         (
@@ -120,7 +225,7 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
                 "n_dimensional": True,
                 "opacity": opacity,
                 "symbol": symbol,
-                "face_color": "lightskyblue",
+                "face_color": non_cell_color,
             },
             "points",
         )
@@ -134,10 +239,13 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
                 "n_dimensional": True,
                 "opacity": opacity,
                 "symbol": symbol,
-                "face_color": "lightgoldenrodyellow",
+                "face_color": cell_color,
             },
             "points",
         )
     )
-
     return layers
+
+
+if __name__ == "__main__":
+    layers = reader_function(sys.argv[1])
