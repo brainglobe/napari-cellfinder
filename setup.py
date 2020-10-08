@@ -15,7 +15,7 @@ requirements = [
     "napari-plugin-engine >= 0.1.4",
     "imlib",
     "napari-ndtiffs",
-    "napari-brainreg",
+    "napari-brainreg>=0.2.2",
 ]
 
 
