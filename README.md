@@ -28,7 +28,11 @@ candidates (in blue). If you carried out registration, then these results will b
 overlaid (similarly to the [napari-brainreg] plugin, but transformed to the 
 coordinate space of your raw data).
 
-*Image to come*
+![load_data](https://raw.githubusercontent.com/brainglobe/napari-cellfinder/master/resources/load_data.gif)
+**Loading raw data**
+
+![load_data](https://raw.githubusercontent.com/brainglobe/napari-cellfinder/master/resources/load_results.gif)
+**Loading cellfinder results**
 
 ## Contributing
 
