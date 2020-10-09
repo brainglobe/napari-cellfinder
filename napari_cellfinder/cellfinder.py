@@ -191,12 +191,20 @@ def scale_registration_layers(layers, atlas, metadata):
     return new_layers
 
 
-def get_scale(atlas, metadata):
-    x_scale = atlas.resolution[2] / metadata["x_pixel_um"]
-    y_scale = atlas.resolution[1] / metadata["y_pixel_um"]
-    z_scale = atlas.resolution[0] / metadata["z_pixel_um"]
-    scale = (z_scale, y_scale, x_scale)
-    return scale
+def get_scale(atlas, metadata, scaling_rounding_decimals=5):
+    source_space = bgs.AnatomicalSpace(metadata["orientation"])
+    scaling = []
+    for idx, axis in enumerate(atlas.space.axes_order):
+        scaling.append(
+            round(
+                atlas.resolution[
+                    atlas.space.axes_order.index(source_space.axes_order[idx])
+                ]
+                / float(metadata["voxel_sizes"][idx]),
+                scaling_rounding_decimals,
+            )
+        )
+    return tuple(scaling)
 
 
 def scale_registration_layer(layer, scale):
