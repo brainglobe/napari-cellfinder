@@ -81,6 +81,23 @@ def get_cell_arrays(cells_file):
     return cells, non_cells
 
 
+def load_cells_from_file(
+    path, layers, point_size, opacity, symbol, channel=None
+):
+    classified_cells_path = path / "points" / "cell_classification.xml"
+    layers = load_cells(
+        layers,
+        classified_cells_path,
+        point_size,
+        opacity,
+        symbol,
+        "lightgoldenrodyellow",
+        "lightskyblue",
+        channel=channel,
+    )
+    return layers
+
+
 def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
     """Take a path or list of paths and return a list of LayerData tuples.
 
@@ -116,16 +133,22 @@ def reader_function(path, point_size=15, opacity=0.6, symbol="ring"):
     if registration_directory.exists():
         layers = load_registration(layers, registration_directory, metadata)
 
-    classified_cells_path = path / "points" / "cell_classification.xml"
-    layers = load_cells(
-        layers,
-        classified_cells_path,
-        point_size,
-        opacity,
-        symbol,
-        "lightgoldenrodyellow",
-        "lightskyblue",
-    )
+    if len(metadata["signal_planes_paths"]) > 1:
+        for channel_path in path.glob("channel*"):
+            channel = channel_path.name.split("_")[-1]
+            layers = load_cells_from_file(
+                channel_path,
+                layers,
+                point_size,
+                opacity,
+                symbol,
+                channel=channel,
+            )
+
+    else:
+        layers = load_cells_from_file(
+            path, layers, point_size, opacity, symbol
+        )
 
     return layers
 
@@ -135,7 +158,9 @@ def load_registration(layers, registration_directory, metadata):
     registration_layers = remove_downsampled_images(registration_layers)
     atlas = get_atlas(registration_layers)
 
-    registration_layers = scale_reorient_layers(registration_layers, atlas, metadata)
+    registration_layers = scale_reorient_layers(
+        registration_layers, atlas, metadata
+    )
     layers.extend(registration_layers)
     return layers
 
@@ -175,9 +200,13 @@ def reorient_registration_layers(layers, atlas, metadata):
     return new_layers
 
 
-def reorient_registration_layer(layer, atlas_orientation, raw_data_orientation):
+def reorient_registration_layer(
+    layer, atlas_orientation, raw_data_orientation
+):
     layer = list(layer)
-    layer[0] = bgs.map_stack_to(atlas_orientation, raw_data_orientation, layer[0])
+    layer[0] = bgs.map_stack_to(
+        atlas_orientation, raw_data_orientation, layer[0]
+    )
     layer = tuple(layer)
     return layer
 
@@ -222,13 +251,19 @@ def load_cells(
     symbol,
     cell_color,
     non_cell_color,
+    channel=None,
 ):
     cells, non_cells = get_cell_arrays(str(classified_cells_path))
+    if channel is not None:
+        channel_base = f"channel_{channel}: "
+    else:
+        channel_base = ""
+
     layers.append(
         (
             non_cells,
             {
-                "name": "Non cells",
+                "name": channel_base + "Non cells",
                 "size": point_size,
                 "n_dimensional": True,
                 "opacity": opacity,
@@ -242,7 +277,7 @@ def load_cells(
         (
             cells,
             {
-                "name": "Cells",
+                "name": channel_base + "Cells",
                 "size": point_size,
                 "n_dimensional": True,
                 "opacity": opacity,
