@@ -14,6 +14,7 @@ def read(fname):
 requirements = [
     "napari-plugin-engine >= 0.1.4",
     "imlib",
+    "bg_space",
     "napari-ndtiffs",
     "napari-brainreg>=0.2.2",
 ]
