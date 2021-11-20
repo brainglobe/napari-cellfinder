@@ -1,4 +1,5 @@
 # napari-cellfinder
+### This tool is no longer under development, please use [brainglobe-napari-io](https://github.com/brainglobe/brainglobe-napari-io) instead
 
 [![License](https://img.shields.io/pypi/l/napari-cellfinder.svg?color=green)](https://github.com/napari/napari-cellfinder/raw/master/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/napari-cellfinder.svg?color=green)](https://pypi.org/project/napari-cellfinder)
